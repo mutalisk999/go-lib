@@ -14,8 +14,17 @@ type TestType struct {
 
 func (c TestType) Pack(writer io.Writer) error {
 	Pack(writer, c.a)
-	PackString(writer, c.b)
+	Pack(writer, c.b)
 	return nil
+}
+
+func (c TestType) UnPack(reader io.Reader) (TestType, error) {
+	var it interface{}
+	it, _ = UnPack(reader, c.a)
+	c.a = it.(int)
+	it, _ = UnPack(reader, c.b)
+	c.b = it.(string)
+	return c, nil
 }
 
 func TestSerialize(t *testing.T) {
@@ -52,6 +61,67 @@ func TestUnSerialize(t *testing.T) {
 	}
 	defer file.Close()
 
-	var a byte
-	UnPack(file, &a)
+	var it interface{}
+	var i int
+	it, _ = UnPack(file, i)
+	i = it.(int)
+	fmt.Println(i)
+
+	var b byte
+	it, _ = UnPack(file, b)
+	b = it.(byte)
+	fmt.Println(b)
+
+	var i16 int16
+	it, _ = UnPack(file, i16)
+	i16 = it.(int16)
+	fmt.Println(i16)
+
+	var i64 int64
+	it, _ = UnPack(file, i64)
+	i64 = it.(int64)
+	fmt.Println(i64)
+
+	var ni int
+	it, _ = UnPack(file, ni)
+	ni = it.(int)
+	fmt.Println(ni)
+
+	var ni8 int8
+	it, _ = UnPack(file, ni8)
+	ni8 = it.(int8)
+	fmt.Println(ni8)
+
+	var ni16 int16
+	it, _ = UnPack(file, ni16)
+	ni16 = it.(int16)
+	fmt.Println(ni16)
+
+	var ni64 int64
+	it, _ = UnPack(file, ni64)
+	ni64 = it.(int64)
+	fmt.Println(ni64)
+
+	var f32 float32
+	it, _ = UnPack(file, f32)
+	f32 = it.(float32)
+	fmt.Println(f32)
+
+	var f64 float64
+	it, _ = UnPack(file, f64)
+	f64 = it.(float64)
+	fmt.Println(f64)
+
+	a := []int{1}
+	it, _ = UnPack(file, a)
+	fmt.Println(it)
+
+	m := []map[string]int{{"a1": 1}}
+	it, _ = UnPack(file, m)
+	fmt.Println(it)
+
+	c := TestType{a: 0, b: ""}
+	it, _ = UnPack(file, c)
+	c = it.(TestType)
+	fmt.Println(c)
 }

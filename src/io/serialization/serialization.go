@@ -157,14 +157,10 @@ func Pack(writer io.Writer, argPack interface{}) error {
 		argObj := reflect.ValueOf(argPack).Convert(reflect.TypeOf(argPack))
 		methodPack := argObj.MethodByName("Pack")
 
-		if methodPack.Int() == 0 {
-			return errors.New("not support to pack object of " + typeStr)
-		} else {
-			errValue := methodPack.Call([]reflect.Value{reflect.ValueOf(writer).Convert(reflect.TypeOf(writer))})
-			err := errValue[0].Interface().(error)
-			if err != nil {
-				return errors.New("fail to pack object of " + typeStr)
-			}
+		errValue := methodPack.Call([]reflect.Value{reflect.ValueOf(writer).Convert(reflect.TypeOf(writer))})
+		err := errValue[0].Interface().(error)
+		if err != nil {
+			return errors.New("fail to pack object of " + typeStr)
 		}
 	}
 
@@ -192,37 +188,37 @@ func UnPackUChar(reader io.Reader) uint8 {
 func UnPackShort(reader io.Reader) int16 {
 	var bytes [2]byte
 	reader.Read(bytes[0:2])
-	return int16(bytes[0]<<8 | bytes[1])
+	return int16(int16(bytes[0])<<8 | int16(bytes[1]))
 }
 
 func UnPackUShort(reader io.Reader) uint16 {
 	var bytes [2]byte
 	reader.Read(bytes[0:2])
-	return uint16(bytes[0]<<8 | bytes[1])
+	return uint16(uint16(bytes[0])<<8 | uint16(bytes[1]))
 }
 
 func UnPackInt(reader io.Reader) int {
 	var bytes [4]byte
 	reader.Read(bytes[0:4])
-	return int(bytes[0]<<24 | bytes[1]<<16 | bytes[2]<<8 | bytes[3])
+	return int(int(bytes[0])<<24 | int(bytes[1])<<16 | int(bytes[2])<<8 | int(bytes[3]))
 }
 
 func UnPackUInt(reader io.Reader) uint {
 	var bytes [4]byte
 	reader.Read(bytes[0:4])
-	return uint(bytes[0]<<24 | bytes[1]<<16 | bytes[2]<<8 | bytes[3])
+	return uint(uint(bytes[0])<<24 | uint(bytes[1])<<16 | uint(bytes[2])<<8 | uint(bytes[3]))
 }
 
 func UnPackLong(reader io.Reader) int64 {
 	var bytes [8]byte
 	reader.Read(bytes[0:8])
-	return int64(bytes[0]<<56 | bytes[1]<<48 | bytes[2]<<40 | bytes[3]<<32 | bytes[4]<<24 | bytes[5]<<16 | bytes[6]<<8 | bytes[7])
+	return int64(int64(bytes[0])<<56 | int64(bytes[1])<<48 | int64(bytes[2])<<40 | int64(bytes[3])<<32 | int64(bytes[4])<<24 | int64(bytes[5])<<16 | int64(bytes[6])<<8 | int64(bytes[7]))
 }
 
 func UnPackULong(reader io.Reader) uint64 {
 	var bytes [8]byte
 	reader.Read(bytes[0:8])
-	return uint64(bytes[0]<<56 | bytes[1]<<48 | bytes[2]<<40 | bytes[3]<<32 | bytes[4]<<24 | bytes[5]<<16 | bytes[6]<<8 | bytes[7])
+	return uint64(uint64(bytes[0])<<56 | uint64(bytes[1])<<48 | uint64(bytes[2])<<40 | uint64(bytes[3])<<32 | uint64(bytes[4])<<24 | uint64(bytes[5])<<16 | uint64(bytes[6])<<8 | uint64(bytes[7]))
 }
 
 func UnPackString(reader io.Reader) string {
@@ -260,8 +256,8 @@ func UnPackDouble(reader io.Reader) float64 {
 	return valDouble
 }
 
-func UnPack(reader io.Reader, argUnPack interface{}) (interface{}, error) {
-	typeStr := reflect.TypeOf(argUnPack).String()
+func UnPack(reader io.Reader, argExample interface{}) (interface{}, error) {
+	typeStr := reflect.TypeOf(argExample).String()
 
 	if typeStr == "byte" {
 		argByte := UnPackByte(reader)
@@ -305,6 +301,52 @@ func UnPack(reader io.Reader, argUnPack interface{}) (interface{}, error) {
 	} else if typeStr == "float64" {
 		argDouble := UnPackDouble(reader)
 		return argDouble, nil
+	} else if typeStr[0] == '[' {
+		var argArray []interface{}
+		argArrayExample := reflect.ValueOf(argExample).Convert(reflect.TypeOf(argExample))
+		if argArrayExample.Len() == 0 {
+			return nil, errors.New("invalid example with nil array")
+		}
+		arraySize := UnPackInt(reader)
+		for i := 0; i < arraySize; i++ {
+			argElement, err := UnPack(reader, argArrayExample.Index(0).Interface())
+			if err != nil {
+				return nil, err
+			} else {
+				argArray = append(argArray, argElement)
+			}
+		}
+		return argArray, nil
+	} else if strings.Contains(typeStr, "map[") && typeStr[0:4] == "map[" {
+		argMap := make(map[interface{}]interface{})
+		argMapExample := reflect.ValueOf(argExample).Convert(reflect.TypeOf(argExample))
+		if argMapExample.Len() == 0 {
+			return nil, errors.New("invalid example with nil map")
+		}
+		exampleKeys := argMapExample.MapKeys()
+		mapSize := UnPackInt(reader)
+		for i := 0; i < mapSize; i++ {
+			argKey, err := UnPack(reader, exampleKeys[0].Interface())
+			if err != nil {
+				return nil, err
+			}
+			argValue, err := UnPack(reader, argMapExample.MapIndex(exampleKeys[0]).Interface())
+			if err != nil {
+				return nil, err
+			}
+			argMap[argKey] = argValue
+		}
+		return argMap, nil
+	} else {
+		refObj := reflect.New(reflect.TypeOf(argExample))
+		methodUnPack := refObj.MethodByName("UnPack")
+
+		retValue := methodUnPack.Call([]reflect.Value{reflect.ValueOf(reader).Convert(reflect.TypeOf(reader))})
+		err := retValue[1].Interface()
+		if err != nil {
+			return nil, errors.New("fail to pack object of " + typeStr)
+		}
+		return retValue[0].Interface(), nil
 	}
 
 	return nil, nil

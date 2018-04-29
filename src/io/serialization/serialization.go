@@ -338,7 +338,7 @@ func UnPack(reader io.Reader, argExample interface{}) (interface{}, error) {
 		}
 		return argMap, nil
 	} else {
-		refObj := reflect.New(reflect.TypeOf(argExample))
+		refObj := reflect.ValueOf(argExample).Convert(reflect.TypeOf(argExample))
 		methodUnPack := refObj.MethodByName("UnPack")
 
 		retValue := methodUnPack.Call([]reflect.Value{reflect.ValueOf(reader).Convert(reflect.TypeOf(reader))})

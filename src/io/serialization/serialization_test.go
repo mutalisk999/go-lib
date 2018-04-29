@@ -9,22 +9,45 @@ import (
 
 type TestType struct {
 	a int
-	b string
+	b []string
+	c map[string]int
 }
 
-func (c TestType) Pack(writer io.Writer) error {
-	Pack(writer, c.a)
-	Pack(writer, c.b)
+func (g *TestType) GetExample() {
+	g.a = 0
+	g.b = append(g.b, "")
+	g.c = make(map[string]int)
+	g.c[""] = 0
+}
+
+func (g TestType) Pack(writer io.Writer) error {
+	Pack(writer, g.a)
+	Pack(writer, g.b)
+	Pack(writer, g.c)
 	return nil
 }
 
-func (c TestType) UnPack(reader io.Reader) (TestType, error) {
+func (g TestType) UnPack(reader io.Reader) (TestType, error) {
 	var it interface{}
-	it, _ = UnPack(reader, c.a)
-	c.a = it.(int)
-	it, _ = UnPack(reader, c.b)
-	c.b = it.(string)
-	return c, nil
+	var r TestType
+	r.c = make(map[string]int)
+
+	it, _ = UnPack(reader, g.a)
+	r.a = it.(int)
+
+	it, _ = UnPack(reader, g.b)
+	tArray := it.([]interface{})
+	for i := 0; i < len(tArray); i++ {
+		r.b = append(r.b, tArray[i].(string))
+	}
+
+	it, _ = UnPack(reader, g.c)
+	tMap := it.(map[interface{}]interface{})
+	for k, v := range tMap {
+		r.c[k.(string)] = v.(int)
+	}
+
+	return r, nil
 }
 
 func TestSerialize(t *testing.T) {
@@ -50,7 +73,7 @@ func TestSerialize(t *testing.T) {
 	Pack(file, a)
 	Pack(file, m)
 
-	c := TestType{a: 0x12345678, b: "abcdefg"}
+	c := TestType{a: 0x12345678, b: []string{"abcdefg", "hijklmn"}, c: map[string]int{"a": 1, "b": 2}}
 	c.Pack(file)
 }
 
@@ -120,7 +143,8 @@ func TestUnSerialize(t *testing.T) {
 	it, _ = UnPack(file, m)
 	fmt.Println(it)
 
-	c := TestType{a: 0, b: ""}
+	c := TestType{}
+	c.GetExample()
 	it, _ = UnPack(file, c)
 	c = it.(TestType)
 	fmt.Println(c)

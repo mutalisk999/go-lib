@@ -5,6 +5,9 @@ import (
 	"io"
 	"os"
 	"testing"
+	"bufio"
+	"bytes"
+	"io/ioutil"
 )
 
 type TestType struct {
@@ -148,4 +151,92 @@ func TestUnSerialize(t *testing.T) {
 	it, _ = UnPack(file, c)
 	c = it.(TestType)
 	fmt.Println(c)
+}
+
+func BenchmarkSerialize(b *testing.B) {
+	for i:=0; i<b.N; i++ {
+		byteBuf := bytes.NewBuffer(make([]byte,0))
+		writeBuf := bufio.NewWriter(byteBuf)
+
+		Pack(writeBuf, int(0x12345678))
+		Pack(writeBuf, byte(0x01))
+		Pack(writeBuf, int16(0x1234))
+		Pack(writeBuf, int64(0x1234567887654321))
+		Pack(writeBuf, int(-1))
+		Pack(writeBuf, int8(-1))
+		Pack(writeBuf, int16(-1))
+		Pack(writeBuf, int64(-1))
+		Pack(writeBuf, float32(1.1))
+		Pack(writeBuf, float64(2.2))
+
+		a := [5]int{1, 2, 3, 4, 5}
+		m := [3]map[string]int{{"a1": 1, "b2": 10, "c3": 2}, {}, {}}
+		Pack(writeBuf, a)
+		Pack(writeBuf, m)
+
+		c := TestType{a: 0x12345678, b: []string{"abcdefg", "hijklmn"}, c: map[string]int{"a": 1, "b": 2}}
+		c.Pack(writeBuf)
+	}
+}
+
+func BenchmarkUnSerialize(b *testing.B) {
+	b.StopTimer()
+	fileBytes, _ := ioutil.ReadFile("test_pack.txt")
+	b.StartTimer()
+
+	for i:=0; i<b.N; i++ {
+		byteBuf := fileBytes
+		readBuf := bytes.NewReader(byteBuf)
+		var it interface{}
+		var i int
+		it, _ = UnPack(readBuf, i)
+		i = it.(int)
+
+		var b byte
+		it, _ = UnPack(readBuf, b)
+		b = it.(byte)
+
+		var i16 int16
+		it, _ = UnPack(readBuf, i16)
+		i16 = it.(int16)
+
+		var i64 int64
+		it, _ = UnPack(readBuf, i64)
+		i64 = it.(int64)
+
+		var ni int
+		it, _ = UnPack(readBuf, ni)
+		ni = it.(int)
+
+		var ni8 int8
+		it, _ = UnPack(readBuf, ni8)
+		ni8 = it.(int8)
+
+		var ni16 int16
+		it, _ = UnPack(readBuf, ni16)
+		ni16 = it.(int16)
+
+		var ni64 int64
+		it, _ = UnPack(readBuf, ni64)
+		ni64 = it.(int64)
+
+		var f32 float32
+		it, _ = UnPack(readBuf, f32)
+		f32 = it.(float32)
+
+		var f64 float64
+		it, _ = UnPack(readBuf, f64)
+		f64 = it.(float64)
+
+		a := []int{1}
+		it, _ = UnPack(readBuf, a)
+
+		m := []map[string]int{{"a1": 1}}
+		it, _ = UnPack(readBuf, m)
+
+		c := TestType{}
+		c.GetExample()
+		it, _ = UnPack(readBuf, c)
+		c = it.(TestType)
+	}
 }

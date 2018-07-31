@@ -2,8 +2,8 @@ package buffer_tcp
 
 import (
 	"fmt"
+	. "github.com/mutalisk999/go-lib/src/sched/goroutine_mgr"
 	"net"
-	. "sched/goroutine_mgr"
 	"testing"
 	"time"
 )

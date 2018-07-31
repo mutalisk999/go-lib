@@ -1,13 +1,13 @@
 package serialization
 
 import (
-	"fmt"
-	"io"
-	"os"
-	"testing"
 	"bufio"
 	"bytes"
+	"fmt"
+	"io"
 	"io/ioutil"
+	"os"
+	"testing"
 )
 
 type TestType struct {
@@ -154,8 +154,8 @@ func TestUnSerialize(t *testing.T) {
 }
 
 func BenchmarkSerialize(b *testing.B) {
-	for i:=0; i<b.N; i++ {
-		byteBuf := bytes.NewBuffer(make([]byte,0))
+	for i := 0; i < b.N; i++ {
+		byteBuf := bytes.NewBuffer(make([]byte, 0))
 		writeBuf := bufio.NewWriter(byteBuf)
 
 		Pack(writeBuf, int(0x12345678))
@@ -184,7 +184,7 @@ func BenchmarkUnSerialize(b *testing.B) {
 	fileBytes, _ := ioutil.ReadFile("test_pack.txt")
 	b.StartTimer()
 
-	for i:=0; i<b.N; i++ {
+	for i := 0; i < b.N; i++ {
 		byteBuf := fileBytes
 		readBuf := bytes.NewReader(byteBuf)
 		var it interface{}

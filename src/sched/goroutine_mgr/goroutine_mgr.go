@@ -50,7 +50,7 @@ func (g *GoroutineManager) GoroutineCreatePn(goroutineName string,
 	goroutineFunc func(Goroutine, ...interface{}),
 	argFunc ...interface{}) uint64 {
 	goroutine := g.constructGoroutine(goroutineName)
-	go goroutineFunc(*goroutine, argFunc)
+	go goroutineFunc(*goroutine, argFunc...)
 	return goroutine.goroutineId
 }
 

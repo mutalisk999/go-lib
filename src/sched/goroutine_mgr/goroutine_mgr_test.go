@@ -9,7 +9,7 @@ import (
 
 func print(g Goroutine, a ...interface{}) {
 	defer g.OnQuit()
-	fmt.Println("print", a)
+	fmt.Println(fmt.Sprintf("print %d %d %d %d %d", a...))
 	time.Sleep(100000)
 }
 

@@ -7,9 +7,15 @@ import (
 	"time"
 )
 
-func print(g Goroutine, a ...interface{}) {
+func printn(g Goroutine, a ...interface{}) {
 	defer g.OnQuit()
-	fmt.Println(fmt.Sprintf("print %d %d %d %d %d", a...))
+	fmt.Println("print", fmt.Sprintf("%d %d %d %d %d", a...))
+	time.Sleep(100000)
+}
+
+func print0(g Goroutine) {
+	defer g.OnQuit()
+	fmt.Println("print0")
 	time.Sleep(100000)
 }
 
@@ -41,8 +47,11 @@ func TestAll(t *testing.T) {
 	manager := new(GoroutineManager)
 	manager.Initialise("mgr1")
 
-	gid := manager.GoroutineCreatePn("goroutine"+strconv.Itoa(0), print, 1, 2, 3, 4, 5)
+	gid := manager.GoroutineCreatePn("goroutine"+strconv.Itoa(0), printn, 1, 2, 3, 4, 5)
 	fmt.Println("gid:", gid)
+
+	gid0 := manager.GoroutineCreateP0("goroutine"+strconv.Itoa(0), print0)
+	fmt.Println("gid0:", gid0)
 
 	gid1 := manager.GoroutineCreateP1("goroutine"+strconv.Itoa(0), print1, 1)
 	fmt.Println("gid1:", gid1)

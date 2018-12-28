@@ -54,6 +54,13 @@ func (g *GoroutineManager) GoroutineCreatePn(goroutineName string,
 	return goroutine.goroutineId
 }
 
+func (g *GoroutineManager) GoroutineCreateP0(goroutineName string,
+	goroutineFunc func(Goroutine)) uint64 {
+	goroutine := g.constructGoroutine(goroutineName)
+	go goroutineFunc(*goroutine)
+	return goroutine.goroutineId
+}
+
 func (g *GoroutineManager) GoroutineCreateP1(goroutineName string,
 	goroutineFunc func(Goroutine, interface{}),
 	argFunc1 interface{}) uint64 {

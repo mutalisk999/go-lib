@@ -10,8 +10,8 @@ import (
 
 type BufferTcpConn struct {
 	conn       net.Conn
-	sendBuffer string
-	readBuffer string
+	sendBuffer []byte
+	readBuffer []byte
 }
 
 type TcpListener struct {
@@ -27,8 +27,8 @@ func (c *BufferTcpConn) TCPConnect(serverAddr string, serverPort uint16, timeOut
 	}
 
 	c.conn = client
-	c.sendBuffer = ""
-	c.readBuffer = ""
+	c.sendBuffer = make([]byte, 0)
+	c.readBuffer = make([]byte, 0)
 	return nil
 }
 
@@ -41,7 +41,7 @@ func (c *BufferTcpConn) TCPRead(nRead uint32) ([]byte, uint32, bool, error) {
 			return readBytes, nRead, remoteClose, nil
 		} else if remoteClose == true {
 			readBytes := []byte(c.readBuffer)
-			c.readBuffer = ""
+			c.readBuffer = make([]byte, 0)
 			return readBytes, uint32(len(readBytes)), remoteClose, nil
 		}
 
@@ -54,7 +54,7 @@ func (c *BufferTcpConn) TCPRead(nRead uint32) ([]byte, uint32, bool, error) {
 				return nil, 0, remoteClose, err
 			}
 		}
-		c.readBuffer = c.readBuffer + string(buf[0:n])
+		c.readBuffer = append(c.readBuffer, buf[0:n]...)
 	}
 }
 
@@ -66,18 +66,18 @@ func (c *BufferTcpConn) TCPFlush() error {
 	if n != len(c.sendBuffer) {
 		return errors.New("can not send completely")
 	}
-	c.sendBuffer = ""
+	c.sendBuffer = make([]byte, 0)
 	return nil
 }
 
 func (c *BufferTcpConn) TCPWrite(bytesWrite []byte) error {
-	c.sendBuffer = c.sendBuffer + string(bytesWrite)
+	c.sendBuffer = append(c.sendBuffer, bytesWrite...)
 	if len(c.sendBuffer) > 40960 {
 		err := c.TCPFlush()
 		if err != nil {
 			return err
 		}
-		c.sendBuffer = ""
+		c.sendBuffer = make([]byte, 0)
 	}
 	return nil
 }
@@ -88,7 +88,7 @@ func (c *BufferTcpConn) TCPDisConnect() error {
 		if err != nil {
 			return err
 		}
-		c.sendBuffer = ""
+		c.sendBuffer = make([]byte, 0)
 	}
 	c.conn.Close()
 	return nil
@@ -116,8 +116,8 @@ func (c *TcpListener) TCPAccept() (*BufferTcpConn, error) {
 
 	tcpConn := new(BufferTcpConn)
 	tcpConn.conn = conn
-	tcpConn.sendBuffer = ""
-	tcpConn.readBuffer = ""
+	tcpConn.sendBuffer = make([]byte, 0)
+	tcpConn.readBuffer = make([]byte, 0)
 	return tcpConn, nil
 }
 

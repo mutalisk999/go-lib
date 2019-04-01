@@ -17,6 +17,14 @@ func (g *Goroutine) OnQuit() {
 	g.fromManager.GoroutineRemove(g)
 }
 
+func (g *Goroutine) GetId() uint64 {
+	return g.goroutineId
+}
+
+func (g *Goroutine) GetName() string {
+	return g.goroutineName
+}
+
 type GoroutineManager struct {
 	mutex        *sync.RWMutex
 	counter      uint64

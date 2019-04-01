@@ -1,16 +1,16 @@
 package blocking_queue
 
 import (
-	"sync"
 	"errors"
+	"sync"
 )
 
 type BlockingQueue struct {
-	mutex 		*sync.RWMutex
-	emptyCond	*sync.Cond
-	fullCond	*sync.Cond
-	fullSize    uint64
-	queue       []interface{}
+	mutex     *sync.RWMutex
+	emptyCond *sync.Cond
+	fullCond  *sync.Cond
+	fullSize  uint64
+	queue     []interface{}
 }
 
 func (b *BlockingQueue) Initialise(maxSize uint64) {
@@ -25,14 +25,14 @@ func (b *BlockingQueue) Initialise(maxSize uint64) {
 	b.queue = make([]interface{}, 0)
 }
 
-func (b *BlockingQueue) QueueSize() int{
+func (b *BlockingQueue) QueueSize() int {
 	b.mutex.Lock()
 	queueSize := len(b.queue)
 	b.mutex.Unlock()
 	return queueSize
 }
 
-func (b *BlockingQueue) PopFront() (interface{}, error){
+func (b *BlockingQueue) PopFront() (interface{}, error) {
 	b.mutex.Lock()
 	queueSize := len(b.queue)
 	if queueSize <= 0 {
@@ -48,7 +48,7 @@ func (b *BlockingQueue) PopFront() (interface{}, error){
 	return nil, nil
 }
 
-func (b *BlockingQueue) PopFrontBlocking() (interface{}) {
+func (b *BlockingQueue) PopFrontBlocking() interface{} {
 	b.mutex.Lock()
 	for {
 		queueSize := len(b.queue)
@@ -69,7 +69,7 @@ func (b *BlockingQueue) PopFrontBlocking() (interface{}) {
 	return queueElem
 }
 
-func (b *BlockingQueue) PushBack(elem interface{}) (error){
+func (b *BlockingQueue) PushBack(elem interface{}) error {
 	b.mutex.Lock()
 	queueSize := len(b.queue)
 	if uint64(queueSize) >= b.fullSize {
@@ -106,5 +106,5 @@ func (b *BlockingQueue) Destroy() {
 	b.emptyCond = nil
 	b.fullCond = nil
 	b.fullSize = 0
-	b.queue = make([]interface{},0)
+	b.queue = make([]interface{}, 0)
 }

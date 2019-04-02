@@ -25,10 +25,10 @@ func (b *BlockingQueue) Initialise(maxSize uint64) {
 	b.queue = make([]interface{}, 0)
 }
 
-func (b *BlockingQueue) QueueSize() int {
-	b.mutex.Lock()
+func (b BlockingQueue) QueueSize() int {
+	b.mutex.RLock()
 	queueSize := len(b.queue)
-	b.mutex.Unlock()
+	b.mutex.RUnlock()
 	return queueSize
 }
 

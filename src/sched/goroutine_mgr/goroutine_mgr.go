@@ -107,6 +107,13 @@ func (g *GoroutineManager) GoroutineRemove(goroutine *Goroutine) {
 	g.mutex.Unlock()
 }
 
+func (g *GoroutineManager) Destroy() {
+	g.mutex = nil
+	g.counter = 0
+	g.managerName = ""
+	g.goroutineMap = make(map[uint64]*Goroutine)
+}
+
 func (g GoroutineManager) GetGoroutineById(goroutineId uint64) *Goroutine {
 	return g.goroutineMap[goroutineId]
 }

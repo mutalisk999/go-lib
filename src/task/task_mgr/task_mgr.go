@@ -7,7 +7,7 @@ import (
 )
 
 type Task struct {
-	taskFunc func(interface{}) error
+	taskFunc func(goroutine_mgr.Goroutine, interface{}) error
 	taskArgs interface{}
 }
 
@@ -23,8 +23,10 @@ type TaskMgr struct {
 func (t *TaskMgr) Initialise(taskMgrName string, goroutineCount uint64, taskQueueBlocking bool, taskQueueMaxSize uint64) {
 	t.taskMgrName = taskMgrName
 	t.goroutineCount = goroutineCount
+	t.goroutineMgr = new(goroutine_mgr.GoroutineManager)
 	t.goroutineMgr.Initialise(t.taskMgrName + ".GoroutineMgr")
 	t.goroutineQuit = make([]chan error, 0)
+	t.taskQueue = new(blocking_queue.BlockingQueue)
 	t.taskQueue.Initialise(taskQueueMaxSize)
 	t.taskQueueBlocking = taskQueueBlocking
 }
@@ -59,7 +61,7 @@ func (t *TaskMgr) runCallBackBlocking(g goroutine_mgr.Goroutine) {
 	defer g.OnQuit()
 	for {
 		task, _ := t.PopTask()
-		task.taskFunc(task.taskArgs)
+		task.taskFunc(g, task.taskArgs)
 	}
 }
 
@@ -70,7 +72,7 @@ func (t *TaskMgr) runCallBack(g goroutine_mgr.Goroutine, chanIndex interface{}, 
 		if err != nil {
 			break
 		}
-		task.taskFunc(task.taskArgs)
+		task.taskFunc(g, task.taskArgs)
 	}
 	if !detach.(bool) {
 		t.goroutineQuit[chanIndex.(int)] <- nil

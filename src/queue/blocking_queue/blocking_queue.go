@@ -32,6 +32,36 @@ func (b BlockingQueue) QueueSize() int {
 	return queueSize
 }
 
+func (b BlockingQueue) Top() (interface{}, error) {
+	b.mutex.Lock()
+	queueSize := len(b.queue)
+	if queueSize <= 0 {
+		b.mutex.Unlock()
+		return nil, errors.New("Top: empty queue")
+	} else {
+		queueElem := b.queue[0]
+		b.mutex.Unlock()
+		return queueElem, nil
+	}
+	b.mutex.Unlock()
+	return nil, nil
+}
+
+func (b BlockingQueue) Back() (interface{}, error) {
+	b.mutex.Lock()
+	queueSize := len(b.queue)
+	if queueSize <= 0 {
+		b.mutex.Unlock()
+		return nil, errors.New("Back: empty queue")
+	} else {
+		queueElem := b.queue[queueSize-1]
+		b.mutex.Unlock()
+		return queueElem, nil
+	}
+	b.mutex.Unlock()
+	return nil, nil
+}
+
 func (b *BlockingQueue) PopFront() (interface{}, error) {
 	b.mutex.Lock()
 	queueSize := len(b.queue)

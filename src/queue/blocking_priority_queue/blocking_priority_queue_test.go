@@ -1,8 +1,8 @@
 package blocking_priority_queue
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 )
 
 func intCmp(l interface{}, r interface{}) int {
@@ -27,7 +27,7 @@ func TestSmaller(t *testing.T) {
 	queue.Push(2)
 	queue.Push(1)
 
-	for{
+	for {
 		if queue.QueueSize() > 0 {
 			v, _ := queue.Pop()
 			fmt.Println("Pop: ", v.(int))
@@ -47,7 +47,7 @@ func TestBigger(t *testing.T) {
 	queue.Push(2)
 	queue.Push(1)
 
-	for{
+	for {
 		if queue.QueueSize() > 0 {
 			v, _ := queue.Pop()
 			fmt.Println("Pop: ", v.(int))

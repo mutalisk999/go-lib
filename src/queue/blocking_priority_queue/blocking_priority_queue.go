@@ -2,8 +2,8 @@ package blocking_priority_queue
 
 import (
 	"errors"
-	"sync"
 	"fmt"
+	"sync"
 )
 
 type BlockingPriorityQueue struct {
@@ -12,11 +12,11 @@ type BlockingPriorityQueue struct {
 	fullCond  *sync.Cond
 	fullSize  uint64
 	queueType int
-	cmpFunc   func(l interface{}, r interface{})int
+	cmpFunc   func(l interface{}, r interface{}) int
 	queue     []interface{}
 }
 
-func swapQueueElem(queue []interface{}, leftIndex int, rightIndex int) error{
+func swapQueueElem(queue []interface{}, leftIndex int, rightIndex int) error {
 	if leftIndex < 0 || leftIndex >= len(queue) {
 		return errors.New(fmt.Sprintf("invalid leftIndex: %d", leftIndex))
 	}
@@ -27,7 +27,7 @@ func swapQueueElem(queue []interface{}, leftIndex int, rightIndex int) error{
 	return nil
 }
 
-func (b *BlockingPriorityQueue) Initialise(queueType int, cmpFunc func(l interface{}, r interface{})int, maxSize uint64) error{
+func (b *BlockingPriorityQueue) Initialise(queueType int, cmpFunc func(l interface{}, r interface{}) int, maxSize uint64) error {
 	if queueType != 1 && queueType != 2 {
 		return errors.New(fmt.Sprintf("invalid queueType: %d", queueType))
 	}
@@ -73,8 +73,8 @@ func (b *BlockingPriorityQueue) siftDown() {
 	if len(b.queue) > 0 {
 		parentIndex := 0
 		for {
-			leftChildIndex := (parentIndex+1)*2-1
-			rightChildIndex := (parentIndex+1)*2
+			leftChildIndex := (parentIndex+1)*2 - 1
+			rightChildIndex := (parentIndex + 1) * 2
 
 			if leftChildIndex >= len(b.queue) {
 				// invalid leftChildIndex and invalid rightChildIndex
@@ -178,7 +178,7 @@ func (b *BlockingPriorityQueue) siftUp() {
 	if len(b.queue) > 0 {
 		childIndex := len(b.queue) - 1
 		for {
-			parentIndex := (childIndex+1)/2-1
+			parentIndex := (childIndex+1)/2 - 1
 			if parentIndex >= 0 {
 				if b.queueType == 1 {
 					if b.cmpFunc(b.queue[parentIndex], b.queue[childIndex]) > 0 {
@@ -247,4 +247,3 @@ func (b *BlockingPriorityQueue) Destroy() {
 	b.cmpFunc = nil
 	b.queue = make([]interface{}, 0)
 }
-

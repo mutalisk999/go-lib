@@ -102,7 +102,7 @@ func (b *BlockingQueue) PopFrontBlocking() interface{} {
 func (b *BlockingQueue) PushBack(elem interface{}) error {
 	b.mutex.Lock()
 	queueSize := len(b.queue)
-	if uint64(queueSize) >= b.fullSize {
+	if b.fullSize != 0 && uint64(queueSize) >= b.fullSize {
 		b.mutex.Unlock()
 		return errors.New("PushBack: full queue")
 	} else {
@@ -119,7 +119,7 @@ func (b *BlockingQueue) PushBackBlocking(elem interface{}) {
 	if b.fullCond != nil {
 		for {
 			queueSize := len(b.queue)
-			if uint64(queueSize) >= b.fullSize {
+			if b.fullSize != 0 && uint64(queueSize) >= b.fullSize {
 				b.fullCond.Wait()
 			} else {
 				break

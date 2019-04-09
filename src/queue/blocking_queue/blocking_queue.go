@@ -91,8 +91,8 @@ func (b *BlockingQueue) PopFrontBlocking() interface{} {
 	queueElem := b.queue[0]
 	b.queue = b.queue[1:]
 
-	if b.emptyCond != nil {
-		b.emptyCond.Broadcast()
+	if b.fullCond != nil {
+		b.fullCond.Broadcast()
 	}
 
 	b.mutex.Unlock()

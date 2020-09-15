@@ -22,7 +22,7 @@ func TestAll(t *testing.T) {
 		task := new(Task)
 		task.taskFunc = taskCallBack
 		task.taskArgs = index
-		taskMgr.PushTask(*task)
+		_ = taskMgr.PushTask(*task)
 		index = index + 1
 		time.Sleep(1 * time.Second)
 	}

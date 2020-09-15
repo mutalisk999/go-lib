@@ -61,7 +61,7 @@ func (t *TaskMgr) runCallBackBlocking(g goroutine_mgr.Goroutine) {
 	defer g.OnQuit()
 	for {
 		task, _ := t.PopTask()
-		task.taskFunc(g, task.taskArgs)
+		_ = task.taskFunc(g, task.taskArgs)
 	}
 }
 
@@ -72,7 +72,7 @@ func (t *TaskMgr) runCallBack(g goroutine_mgr.Goroutine, chanIndex interface{}, 
 		if err != nil {
 			break
 		}
-		task.taskFunc(g, task.taskArgs)
+		_ = task.taskFunc(g, task.taskArgs)
 	}
 	if !detach.(bool) {
 		t.goroutineQuit[chanIndex.(int)] <- nil

@@ -24,9 +24,9 @@ func (g *TestType) GetExample() {
 }
 
 func (g TestType) Pack(writer io.Writer) error {
-	Pack(writer, g.a)
-	Pack(writer, g.b)
-	Pack(writer, g.c)
+	_ = Pack(writer, g.a)
+	_ = Pack(writer, g.b)
+	_ = Pack(writer, g.c)
 	return nil
 }
 
@@ -60,24 +60,24 @@ func TestSerialize(t *testing.T) {
 	}
 	defer file.Close()
 
-	Pack(file, int(0x12345678))
-	Pack(file, byte(0x01))
-	Pack(file, int16(0x1234))
-	Pack(file, int64(0x1234567887654321))
-	Pack(file, int(-1))
-	Pack(file, int8(-1))
-	Pack(file, int16(-1))
-	Pack(file, int64(-1))
-	Pack(file, float32(1.1))
-	Pack(file, float64(2.2))
+	_ = Pack(file, int(0x12345678))
+	_ = Pack(file, byte(0x01))
+	_ = Pack(file, int16(0x1234))
+	_ = Pack(file, int64(0x1234567887654321))
+	_ = Pack(file, int(-1))
+	_ = Pack(file, int8(-1))
+	_ = Pack(file, int16(-1))
+	_ = Pack(file, int64(-1))
+	_ = Pack(file, float32(1.1))
+	_ = Pack(file, float64(2.2))
 
 	a := [5]int{1, 2, 3, 4, 5}
 	m := [3]map[string]int{{"a1": 1, "b2": 10, "c3": 2}, {}, {}}
-	Pack(file, a)
-	Pack(file, m)
+	_ = Pack(file, a)
+	_ = Pack(file, m)
 
 	c := TestType{a: 0x12345678, b: []string{"abcdefg", "hijklmn"}, c: map[string]int{"a": 1, "b": 2}}
-	c.Pack(file)
+	_ = c.Pack(file)
 }
 
 func TestUnSerialize(t *testing.T) {
@@ -158,24 +158,24 @@ func BenchmarkSerialize(b *testing.B) {
 		byteBuf := bytes.NewBuffer(make([]byte, 0))
 		writeBuf := bufio.NewWriter(byteBuf)
 
-		Pack(writeBuf, int(0x12345678))
-		Pack(writeBuf, byte(0x01))
-		Pack(writeBuf, int16(0x1234))
-		Pack(writeBuf, int64(0x1234567887654321))
-		Pack(writeBuf, int(-1))
-		Pack(writeBuf, int8(-1))
-		Pack(writeBuf, int16(-1))
-		Pack(writeBuf, int64(-1))
-		Pack(writeBuf, float32(1.1))
-		Pack(writeBuf, float64(2.2))
+		_ = Pack(writeBuf, int(0x12345678))
+		_ = Pack(writeBuf, byte(0x01))
+		_ = Pack(writeBuf, int16(0x1234))
+		_ = Pack(writeBuf, int64(0x1234567887654321))
+		_ = Pack(writeBuf, int(-1))
+		_ = Pack(writeBuf, int8(-1))
+		_ = Pack(writeBuf, int16(-1))
+		_ = Pack(writeBuf, int64(-1))
+		_ = Pack(writeBuf, float32(1.1))
+		_ = Pack(writeBuf, float64(2.2))
 
 		a := [5]int{1, 2, 3, 4, 5}
 		m := [3]map[string]int{{"a1": 1, "b2": 10, "c3": 2}, {}, {}}
-		Pack(writeBuf, a)
-		Pack(writeBuf, m)
+		_ = Pack(writeBuf, a)
+		_ = Pack(writeBuf, m)
 
 		c := TestType{a: 0x12345678, b: []string{"abcdefg", "hijklmn"}, c: map[string]int{"a": 1, "b": 2}}
-		c.Pack(writeBuf)
+		_ = c.Pack(writeBuf)
 	}
 }
 

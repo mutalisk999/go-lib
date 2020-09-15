@@ -65,8 +65,8 @@ func (b BlockingPriorityQueue) Top() (interface{}, error) {
 		b.mutex.Unlock()
 		return queueElem, nil
 	}
-	b.mutex.Unlock()
-	return nil, nil
+	//b.mutex.Unlock()
+	//return nil, nil
 }
 
 func (b *BlockingPriorityQueue) siftDown() {
@@ -83,14 +83,14 @@ func (b *BlockingPriorityQueue) siftDown() {
 				// valid leftChildIndex and invalid rightChildIndex
 				if b.queueType == 1 {
 					if b.cmpFunc(b.queue[parentIndex], b.queue[leftChildIndex]) > 0 {
-						swapQueueElem(b.queue, parentIndex, leftChildIndex)
+						_ = swapQueueElem(b.queue, parentIndex, leftChildIndex)
 						parentIndex = leftChildIndex
 					} else {
 						break
 					}
 				} else if b.queueType == 2 {
 					if b.cmpFunc(b.queue[parentIndex], b.queue[leftChildIndex]) < 0 {
-						swapQueueElem(b.queue, parentIndex, leftChildIndex)
+						_ = swapQueueElem(b.queue, parentIndex, leftChildIndex)
 						parentIndex = leftChildIndex
 					} else {
 						break
@@ -106,7 +106,7 @@ func (b *BlockingPriorityQueue) siftDown() {
 						smallerIndex = rightChildIndex
 					}
 					if b.cmpFunc(b.queue[parentIndex], b.queue[smallerIndex]) > 0 {
-						swapQueueElem(b.queue, parentIndex, smallerIndex)
+						_ = swapQueueElem(b.queue, parentIndex, smallerIndex)
 						parentIndex = smallerIndex
 					} else {
 						break
@@ -119,7 +119,7 @@ func (b *BlockingPriorityQueue) siftDown() {
 						biggerIndex = rightChildIndex
 					}
 					if b.cmpFunc(b.queue[parentIndex], b.queue[biggerIndex]) < 0 {
-						swapQueueElem(b.queue, parentIndex, biggerIndex)
+						_ = swapQueueElem(b.queue, parentIndex, biggerIndex)
 						parentIndex = biggerIndex
 					} else {
 						break
@@ -137,7 +137,7 @@ func (b *BlockingPriorityQueue) Pop() (interface{}, error) {
 		b.mutex.Unlock()
 		return nil, errors.New("Pop: empty queue")
 	} else {
-		swapQueueElem(b.queue, 0, len(b.queue)-1)
+		_ = swapQueueElem(b.queue, 0, len(b.queue)-1)
 		queueElem := b.queue[len(b.queue)-1]
 		b.queue = b.queue[:len(b.queue)-1]
 		// sift down
@@ -145,8 +145,8 @@ func (b *BlockingPriorityQueue) Pop() (interface{}, error) {
 		b.mutex.Unlock()
 		return queueElem, nil
 	}
-	b.mutex.Unlock()
-	return nil, nil
+	//b.mutex.Unlock()
+	//return nil, nil
 }
 
 func (b *BlockingPriorityQueue) PopBlocking() interface{} {
@@ -160,7 +160,7 @@ func (b *BlockingPriorityQueue) PopBlocking() interface{} {
 		}
 	}
 
-	swapQueueElem(b.queue, 0, len(b.queue)-1)
+	_ = swapQueueElem(b.queue, 0, len(b.queue)-1)
 	queueElem := b.queue[len(b.queue)-1]
 	b.queue = b.queue[:len(b.queue)-1]
 	// sift down
@@ -182,14 +182,14 @@ func (b *BlockingPriorityQueue) siftUp() {
 			if parentIndex >= 0 {
 				if b.queueType == 1 {
 					if b.cmpFunc(b.queue[parentIndex], b.queue[childIndex]) > 0 {
-						swapQueueElem(b.queue, parentIndex, childIndex)
+						_ = swapQueueElem(b.queue, parentIndex, childIndex)
 						childIndex = parentIndex
 					} else {
 						break
 					}
 				} else if b.queueType == 2 {
 					if b.cmpFunc(b.queue[parentIndex], b.queue[childIndex]) < 0 {
-						swapQueueElem(b.queue, parentIndex, childIndex)
+						_ = swapQueueElem(b.queue, parentIndex, childIndex)
 						childIndex = parentIndex
 					} else {
 						break
@@ -215,8 +215,8 @@ func (b *BlockingPriorityQueue) Push(elem interface{}) error {
 		b.mutex.Unlock()
 		return nil
 	}
-	b.mutex.Unlock()
-	return nil
+	//b.mutex.Unlock()
+	//return nil
 }
 
 func (b *BlockingPriorityQueue) PushBlocking(elem interface{}) {

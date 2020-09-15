@@ -37,7 +37,7 @@ func TestAll(t *testing.T) {
 		task.taskFunc = taskCallBack
 		task.taskArgs = index
 		task.taskPriority = index
-		taskMgr.PushTask(*task)
+		_ = taskMgr.PushTask(*task)
 	}
 
 	time.Sleep(1 * time.Second)

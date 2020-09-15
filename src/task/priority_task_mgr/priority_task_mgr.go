@@ -29,7 +29,7 @@ func (t *PriorityTaskMgr) Initialise(taskMgrName string, goroutineCount uint64, 
 	t.goroutineMgr.Initialise(t.taskMgrName + ".GoroutineMgr")
 	t.goroutineQuit = make([]chan error, 0)
 	t.taskQueue = new(blocking_priority_queue.BlockingPriorityQueue)
-	t.taskQueue.Initialise(2, taskCmpFunc, taskQueueMaxSize)
+	_ = t.taskQueue.Initialise(2, taskCmpFunc, taskQueueMaxSize)
 	t.taskQueueBlocking = taskQueueBlocking
 }
 
@@ -63,7 +63,7 @@ func (t *PriorityTaskMgr) runCallBackBlocking(g goroutine_mgr.Goroutine) {
 	defer g.OnQuit()
 	for {
 		task, _ := t.PopTask()
-		task.taskFunc(g, task.taskArgs)
+		_ = task.taskFunc(g, task.taskArgs)
 	}
 }
 
@@ -74,7 +74,7 @@ func (t *PriorityTaskMgr) runCallBack(g goroutine_mgr.Goroutine, chanIndex inter
 		if err != nil {
 			break
 		}
-		task.taskFunc(g, task.taskArgs)
+		_ = task.taskFunc(g, task.taskArgs)
 	}
 	if !detach.(bool) {
 		t.goroutineQuit[chanIndex.(int)] <- nil

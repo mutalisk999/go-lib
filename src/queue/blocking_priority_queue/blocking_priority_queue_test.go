@@ -19,13 +19,13 @@ func intCmp(l interface{}, r interface{}) int {
 
 func TestSmaller(t *testing.T) {
 	queue := new(BlockingPriorityQueue)
-	queue.Initialise(1, intCmp, 0)
+	_ = queue.Initialise(1, intCmp, 0)
 
-	queue.Push(8)
-	queue.Push(5)
-	queue.Push(10)
-	queue.Push(2)
-	queue.Push(1)
+	_ = queue.Push(8)
+	_ = queue.Push(5)
+	_ = queue.Push(10)
+	_ = queue.Push(2)
+	_ = queue.Push(1)
 
 	for {
 		if queue.QueueSize() > 0 {
@@ -39,13 +39,13 @@ func TestSmaller(t *testing.T) {
 
 func TestBigger(t *testing.T) {
 	queue := new(BlockingPriorityQueue)
-	queue.Initialise(2, intCmp, 0)
+	_ = queue.Initialise(2, intCmp, 0)
 
-	queue.Push(8)
-	queue.Push(5)
-	queue.Push(10)
-	queue.Push(2)
-	queue.Push(1)
+	_ = queue.Push(8)
+	_ = queue.Push(5)
+	_ = queue.Push(10)
+	_ = queue.Push(2)
+	_ = queue.Push(1)
 
 	for {
 		if queue.QueueSize() > 0 {

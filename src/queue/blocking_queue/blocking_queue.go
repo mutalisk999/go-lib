@@ -43,8 +43,8 @@ func (b BlockingQueue) Top() (interface{}, error) {
 		b.mutex.Unlock()
 		return queueElem, nil
 	}
-	b.mutex.Unlock()
-	return nil, nil
+	//b.mutex.Unlock()
+	//return nil, nil
 }
 
 func (b BlockingQueue) Back() (interface{}, error) {
@@ -58,8 +58,8 @@ func (b BlockingQueue) Back() (interface{}, error) {
 		b.mutex.Unlock()
 		return queueElem, nil
 	}
-	b.mutex.Unlock()
-	return nil, nil
+	//b.mutex.Unlock()
+	//return nil, nil
 }
 
 func (b *BlockingQueue) PopFront() (interface{}, error) {
@@ -74,8 +74,8 @@ func (b *BlockingQueue) PopFront() (interface{}, error) {
 		b.mutex.Unlock()
 		return queueElem, nil
 	}
-	b.mutex.Unlock()
-	return nil, nil
+	//b.mutex.Unlock()
+	//return nil, nil
 }
 
 func (b *BlockingQueue) PopFrontBlocking() interface{} {
@@ -110,8 +110,8 @@ func (b *BlockingQueue) PushBack(elem interface{}) error {
 		b.mutex.Unlock()
 		return nil
 	}
-	b.mutex.Unlock()
-	return nil
+	//b.mutex.Unlock()
+	//return nil
 }
 
 func (b *BlockingQueue) PushBackBlocking(elem interface{}) {

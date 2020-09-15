@@ -33,12 +33,12 @@ func (g *RpcClient) RpcConnect(serverAddr string, serverPort uint16, timeOut flo
 
 func (g *RpcClient) RpcDisConnect() {
 	if g.rpcCli != nil {
-		g.rpcCli.Close()
+		_ = g.rpcCli.Close()
 		g.rpcCli = nil
 	}
 
 	if g.rpcConn != nil {
-		(*g.rpcConn).Close()
+		_ = (*g.rpcConn).Close()
 		g.rpcConn = nil
 	}
 }

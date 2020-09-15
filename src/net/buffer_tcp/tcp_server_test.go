@@ -13,7 +13,7 @@ func TestTcpServer(t *testing.T) {
 	manager.Initialise("mgr1")
 
 	listener := new(TcpListener)
-	err := listener.TCPListen(&net.TCPAddr{net.ParseIP("0.0.0.0"), 8888, ""})
+	err := listener.TCPListen(&net.TCPAddr{IP: net.ParseIP("0.0.0.0"), Port: 8888})
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -44,11 +44,11 @@ func connectorCallback(g Goroutine, args ...interface{}) {
 	}
 
 	for i := 0; i < 100; i++ {
-		conn.TCPWrite([]byte("1234567890abcdefg"))
-		conn.TCPFlush()
+		_ = conn.TCPWrite([]byte("1234567890abcdefg"))
+		_ = conn.TCPFlush()
 		time.Sleep(1000)
 	}
-	conn.TCPDisConnect()
+	_ = conn.TCPDisConnect()
 }
 
 func receiverCallback(g Goroutine, conn interface{}) {

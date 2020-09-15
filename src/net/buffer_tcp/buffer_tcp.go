@@ -90,7 +90,7 @@ func (c *BufferTcpConn) TCPDisConnect() error {
 		}
 		c.sendBuffer = make([]byte, 0)
 	}
-	c.conn.Close()
+	_ = c.conn.Close()
 	return nil
 }
 
@@ -123,6 +123,6 @@ func (c *TcpListener) TCPAccept() (*BufferTcpConn, error) {
 
 func (c *TcpListener) TCPListenClose() {
 	if c.listener != nil {
-		c.listener.Close()
+		_ = c.listener.Close()
 	}
 }

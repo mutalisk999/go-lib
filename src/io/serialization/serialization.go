@@ -10,31 +10,31 @@ import (
 
 func PackByte(writer io.Writer, argByte byte) {
 	bytes := []byte{argByte}
-	writer.Write(bytes)
+	_, _ = writer.Write(bytes)
 }
 
 func PackShort(writer io.Writer, argShort int16) {
 	bytes := []byte{byte((argShort >> 8) & 0xFF), byte((argShort & 0x00FF) >> 0)}
-	writer.Write(bytes)
+	_, _ = writer.Write(bytes)
 }
 
 func PackUShort(writer io.Writer, argUShort uint16) {
 	bytes := []byte{byte((argUShort & 0xFF00) >> 8), byte((argUShort & 0x00FF) >> 0)}
-	writer.Write(bytes)
+	_, _ = writer.Write(bytes)
 }
 
 func PackInt(writer io.Writer, argInt int) {
 	bytes := []byte{
 		byte((argInt >> 24) & 0xFF), byte((argInt & 0x00FF0000) >> 16),
 		byte((argInt & 0x0000FF00) >> 8), byte((argInt & 0x000000FF) >> 0)}
-	writer.Write(bytes)
+	_, _ = writer.Write(bytes)
 }
 
 func PackUInt(writer io.Writer, argUInt uint) {
 	bytes := []byte{
 		byte((argUInt & 0xFF000000) >> 24), byte((argUInt & 0x00FF0000) >> 16),
 		byte((argUInt & 0x0000FF00) >> 8), byte((argUInt & 0x000000FF) >> 0)}
-	writer.Write(bytes)
+	_, _ = writer.Write(bytes)
 }
 
 func PackLong(writer io.Writer, argLong int64) {
@@ -43,7 +43,7 @@ func PackLong(writer io.Writer, argLong int64) {
 		byte((argLong & 0x0000FF0000000000) >> 40), byte((argLong & 0x000000FF00000000) >> 32),
 		byte((argLong & 0x00000000FF000000) >> 24), byte((argLong & 0x0000000000FF0000) >> 16),
 		byte((argLong & 0x000000000000FF00) >> 8), byte((argLong & 0x00000000000000FF) >> 0)}
-	writer.Write(bytes)
+	_, _ = writer.Write(bytes)
 }
 
 func PackULong(writer io.Writer, argULong uint64) {
@@ -52,13 +52,13 @@ func PackULong(writer io.Writer, argULong uint64) {
 		byte((argULong & 0x0000FF0000000000) >> 40), byte((argULong & 0x000000FF00000000) >> 32),
 		byte((argULong & 0x00000000FF000000) >> 24), byte((argULong & 0x0000000000FF0000) >> 16),
 		byte((argULong & 0x000000000000FF00) >> 8), byte((argULong & 0x00000000000000FF) >> 0)}
-	writer.Write(bytes)
+	_, _ = writer.Write(bytes)
 }
 
 func PackString(writer io.Writer, argString string) {
 	PackInt(writer, len(argString))
 	bytes := []byte(argString)
-	writer.Write(bytes)
+	_, _ = writer.Write(bytes)
 }
 
 func PackFloat(writer io.Writer, argFloat float32) {
@@ -68,7 +68,7 @@ func PackFloat(writer io.Writer, argFloat float32) {
 		*(*byte)(unsafe.Pointer(unsafePtr + uintptr(1))),
 		*(*byte)(unsafe.Pointer(unsafePtr + uintptr(2))),
 		*(*byte)(unsafe.Pointer(unsafePtr + uintptr(3)))}
-	writer.Write(bytes)
+	_, _ = writer.Write(bytes)
 }
 
 func PackDouble(writer io.Writer, argDouble float64) {
@@ -82,7 +82,7 @@ func PackDouble(writer io.Writer, argDouble float64) {
 		*(*byte)(unsafe.Pointer(unsafePtr + uintptr(5))),
 		*(*byte)(unsafe.Pointer(unsafePtr + uintptr(6))),
 		*(*byte)(unsafe.Pointer(unsafePtr + uintptr(7)))}
-	writer.Write(bytes)
+	_, _ = writer.Write(bytes)
 }
 
 func Pack(writer io.Writer, argPack interface{}) error {
@@ -169,68 +169,68 @@ func Pack(writer io.Writer, argPack interface{}) error {
 
 func UnPackByte(reader io.Reader) byte {
 	var bytes [1]byte
-	reader.Read(bytes[0:1])
+	_, _ = reader.Read(bytes[0:1])
 	return bytes[0]
 }
 
 func UnPackChar(reader io.Reader) int8 {
 	var bytes [1]byte
-	reader.Read(bytes[0:1])
+	_, _ = reader.Read(bytes[0:1])
 	return int8(bytes[0])
 }
 
 func UnPackUChar(reader io.Reader) uint8 {
 	var bytes [1]byte
-	reader.Read(bytes[0:1])
+	_, _ = reader.Read(bytes[0:1])
 	return uint8(bytes[0])
 }
 
 func UnPackShort(reader io.Reader) int16 {
 	var bytes [2]byte
-	reader.Read(bytes[0:2])
+	_, _ = reader.Read(bytes[0:2])
 	return int16(int16(bytes[0])<<8 | int16(bytes[1]))
 }
 
 func UnPackUShort(reader io.Reader) uint16 {
 	var bytes [2]byte
-	reader.Read(bytes[0:2])
+	_, _ = reader.Read(bytes[0:2])
 	return uint16(uint16(bytes[0])<<8 | uint16(bytes[1]))
 }
 
 func UnPackInt(reader io.Reader) int {
 	var bytes [4]byte
-	reader.Read(bytes[0:4])
+	_, _ = reader.Read(bytes[0:4])
 	return int(int(bytes[0])<<24 | int(bytes[1])<<16 | int(bytes[2])<<8 | int(bytes[3]))
 }
 
 func UnPackUInt(reader io.Reader) uint {
 	var bytes [4]byte
-	reader.Read(bytes[0:4])
+	_, _ = reader.Read(bytes[0:4])
 	return uint(uint(bytes[0])<<24 | uint(bytes[1])<<16 | uint(bytes[2])<<8 | uint(bytes[3]))
 }
 
 func UnPackLong(reader io.Reader) int64 {
 	var bytes [8]byte
-	reader.Read(bytes[0:8])
+	_, _ = reader.Read(bytes[0:8])
 	return int64(int64(bytes[0])<<56 | int64(bytes[1])<<48 | int64(bytes[2])<<40 | int64(bytes[3])<<32 | int64(bytes[4])<<24 | int64(bytes[5])<<16 | int64(bytes[6])<<8 | int64(bytes[7]))
 }
 
 func UnPackULong(reader io.Reader) uint64 {
 	var bytes [8]byte
-	reader.Read(bytes[0:8])
+	_, _ = reader.Read(bytes[0:8])
 	return uint64(uint64(bytes[0])<<56 | uint64(bytes[1])<<48 | uint64(bytes[2])<<40 | uint64(bytes[3])<<32 | uint64(bytes[4])<<24 | uint64(bytes[5])<<16 | uint64(bytes[6])<<8 | uint64(bytes[7]))
 }
 
 func UnPackString(reader io.Reader) string {
 	strLength := UnPackInt(reader)
 	bytes := make([]byte, strLength)
-	reader.Read(bytes[0:strLength])
+	_, _ = reader.Read(bytes[0:strLength])
 	return string(bytes)
 }
 
 func UnPackFloat(reader io.Reader) float32 {
 	var bytes [4]byte
-	reader.Read(bytes[0:4])
+	_, _ = reader.Read(bytes[0:4])
 	var valFloat float32
 	unsafePtr := uintptr(unsafe.Pointer(&valFloat))
 	*(*byte)(unsafe.Pointer(unsafePtr)) = bytes[0]
@@ -242,7 +242,7 @@ func UnPackFloat(reader io.Reader) float32 {
 
 func UnPackDouble(reader io.Reader) float64 {
 	var bytes [8]byte
-	reader.Read(bytes[0:8])
+	_, _ = reader.Read(bytes[0:8])
 	var valDouble float64
 	unsafePtr := uintptr(unsafe.Pointer(&valDouble))
 	*(*byte)(unsafe.Pointer(unsafePtr)) = bytes[0]
@@ -349,5 +349,5 @@ func UnPack(reader io.Reader, argExample interface{}) (interface{}, error) {
 		return retValue[0].Interface(), nil
 	}
 
-	return nil, nil
+	//return nil, nil
 }

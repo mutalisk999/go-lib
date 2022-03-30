@@ -1,353 +1,421 @@
 package serialization
 
 import (
+	"encoding/binary"
 	"errors"
+	"fmt"
 	"io"
+	"math"
 	"reflect"
-	"strings"
-	"unsafe"
 )
 
-func PackByte(writer io.Writer, argByte byte) {
-	bytes := []byte{argByte}
-	_, _ = writer.Write(bytes)
+func PackBool(writer io.Writer, argBool bool) error {
+	boolByte := uint8(0)
+	if argBool {
+		boolByte = uint8(1)
+	}
+	bytes := []byte{boolByte}
+	_, err := writer.Write(bytes)
+	return err
 }
 
-func PackShort(writer io.Writer, argShort int16) {
-	bytes := []byte{byte((argShort >> 8) & 0xFF), byte((argShort & 0x00FF) >> 0)}
-	_, _ = writer.Write(bytes)
+func PackInt8(writer io.Writer, argInt8 int8) error {
+	_, err := writer.Write([]byte{uint8(argInt8)})
+	return err
 }
 
-func PackUShort(writer io.Writer, argUShort uint16) {
-	bytes := []byte{byte((argUShort & 0xFF00) >> 8), byte((argUShort & 0x00FF) >> 0)}
-	_, _ = writer.Write(bytes)
+func PackUint8(writer io.Writer, argUint8 uint8) error {
+	_, err := writer.Write([]byte{argUint8})
+	return err
 }
 
-func PackInt(writer io.Writer, argInt int) {
-	bytes := []byte{
-		byte((argInt >> 24) & 0xFF), byte((argInt & 0x00FF0000) >> 16),
-		byte((argInt & 0x0000FF00) >> 8), byte((argInt & 0x000000FF) >> 0)}
-	_, _ = writer.Write(bytes)
+func PackInt16(writer io.Writer, argInt16 int16) error {
+	bytes := make([]byte, 2)
+	binary.LittleEndian.PutUint16(bytes, uint16(argInt16))
+	_, err := writer.Write(bytes)
+	return err
 }
 
-func PackUInt(writer io.Writer, argUInt uint) {
-	bytes := []byte{
-		byte((argUInt & 0xFF000000) >> 24), byte((argUInt & 0x00FF0000) >> 16),
-		byte((argUInt & 0x0000FF00) >> 8), byte((argUInt & 0x000000FF) >> 0)}
-	_, _ = writer.Write(bytes)
+func PackUint16(writer io.Writer, argUint16 uint16) error {
+	bytes := make([]byte, 2)
+	binary.LittleEndian.PutUint16(bytes, argUint16)
+	_, err := writer.Write(bytes)
+	return err
 }
 
-func PackLong(writer io.Writer, argLong int64) {
-	bytes := []byte{
-		byte((argLong >> 56) & 0xFF), byte((argLong & 0x00FF000000000000) >> 48),
-		byte((argLong & 0x0000FF0000000000) >> 40), byte((argLong & 0x000000FF00000000) >> 32),
-		byte((argLong & 0x00000000FF000000) >> 24), byte((argLong & 0x0000000000FF0000) >> 16),
-		byte((argLong & 0x000000000000FF00) >> 8), byte((argLong & 0x00000000000000FF) >> 0)}
-	_, _ = writer.Write(bytes)
+func PackInt32(writer io.Writer, argInt32 int32) error {
+	bytes := make([]byte, 4)
+	binary.LittleEndian.PutUint32(bytes, uint32(argInt32))
+	_, err := writer.Write(bytes)
+	return err
 }
 
-func PackULong(writer io.Writer, argULong uint64) {
-	bytes := []byte{
-		byte((argULong & 0xFF00000000000000) >> 56), byte((argULong & 0x00FF000000000000) >> 48),
-		byte((argULong & 0x0000FF0000000000) >> 40), byte((argULong & 0x000000FF00000000) >> 32),
-		byte((argULong & 0x00000000FF000000) >> 24), byte((argULong & 0x0000000000FF0000) >> 16),
-		byte((argULong & 0x000000000000FF00) >> 8), byte((argULong & 0x00000000000000FF) >> 0)}
-	_, _ = writer.Write(bytes)
+func PackUint32(writer io.Writer, argUint32 uint32) error {
+	bytes := make([]byte, 4)
+	binary.LittleEndian.PutUint32(bytes, argUint32)
+	_, err := writer.Write(bytes)
+	return err
 }
 
-func PackString(writer io.Writer, argString string) {
-	PackInt(writer, len(argString))
-	bytes := []byte(argString)
-	_, _ = writer.Write(bytes)
+func PackInt64(writer io.Writer, argInt64 int64) error {
+	bytes := make([]byte, 8)
+	binary.LittleEndian.PutUint64(bytes, uint64(argInt64))
+	_, err := writer.Write(bytes)
+	return err
 }
 
-func PackFloat(writer io.Writer, argFloat float32) {
-	unsafePtr := uintptr(unsafe.Pointer(&argFloat))
-	bytes := []byte{
-		*(*byte)(unsafe.Pointer(unsafePtr)),
-		*(*byte)(unsafe.Pointer(unsafePtr + uintptr(1))),
-		*(*byte)(unsafe.Pointer(unsafePtr + uintptr(2))),
-		*(*byte)(unsafe.Pointer(unsafePtr + uintptr(3)))}
-	_, _ = writer.Write(bytes)
+func PackUint64(writer io.Writer, argUint64 uint64) error {
+	bytes := make([]byte, 8)
+	binary.LittleEndian.PutUint64(bytes, argUint64)
+	_, err := writer.Write(bytes)
+	return err
 }
 
-func PackDouble(writer io.Writer, argDouble float64) {
-	unsafePtr := uintptr(unsafe.Pointer(&argDouble))
-	bytes := []byte{
-		*(*byte)(unsafe.Pointer(unsafePtr)),
-		*(*byte)(unsafe.Pointer(unsafePtr + uintptr(1))),
-		*(*byte)(unsafe.Pointer(unsafePtr + uintptr(2))),
-		*(*byte)(unsafe.Pointer(unsafePtr + uintptr(3))),
-		*(*byte)(unsafe.Pointer(unsafePtr + uintptr(4))),
-		*(*byte)(unsafe.Pointer(unsafePtr + uintptr(5))),
-		*(*byte)(unsafe.Pointer(unsafePtr + uintptr(6))),
-		*(*byte)(unsafe.Pointer(unsafePtr + uintptr(7)))}
-	_, _ = writer.Write(bytes)
+func PackInt(writer io.Writer, argInt int) error {
+	bytes := make([]byte, 8)
+	binary.LittleEndian.PutUint64(bytes, uint64(argInt))
+	_, err := writer.Write(bytes)
+	return err
+}
+
+func PackUint(writer io.Writer, argUint uint) error {
+	bytes := make([]byte, 8)
+	binary.LittleEndian.PutUint64(bytes, uint64(argUint))
+	_, err := writer.Write(bytes)
+	return err
+}
+
+func PackFloat32(writer io.Writer, argFloat32 float32) error {
+	argByteU32 := math.Float32bits(argFloat32)
+	return PackUint32(writer, argByteU32)
+}
+
+func PackFloat64(writer io.Writer, argFloat64 float64) error {
+	argByteU64 := math.Float64bits(argFloat64)
+	return PackUint64(writer, argByteU64)
+}
+
+func PackString(writer io.Writer, argString string) error {
+	strLen := uint32(len(argString))
+	err := PackUint32(writer, strLen)
+	if err != nil {
+		return err
+	}
+	_, err = writer.Write([]byte(argString))
+	return err
 }
 
 func Pack(writer io.Writer, argPack interface{}) error {
-	typeStr := reflect.TypeOf(argPack).String()
+	typeKind := reflect.TypeOf(argPack).Kind()
+	typeValue := reflect.ValueOf(argPack)
 
-	if typeStr == "byte" {
-		argByte := argPack.(byte)
-		PackByte(writer, argByte)
-	} else if typeStr == "int8" {
-		argByte := byte(argPack.(int8))
-		PackByte(writer, argByte)
-	} else if typeStr == "uint8" {
-		argByte := byte(argPack.(uint8))
-		PackByte(writer, argByte)
-	} else if typeStr == "int16" {
-		argShort := argPack.(int16)
-		PackShort(writer, argShort)
-	} else if typeStr == "uint16" {
-		argUShort := argPack.(uint16)
-		PackUShort(writer, argUShort)
-	} else if typeStr == "int" {
-		argInt := argPack.(int)
-		PackInt(writer, argInt)
-	} else if typeStr == "uint" {
-		argUInt := argPack.(uint)
-		PackUInt(writer, argUInt)
-	} else if typeStr == "int32" {
-		argInt := int(argPack.(int32))
-		PackInt(writer, argInt)
-	} else if typeStr == "uint32" {
-		argUInt := uint(argPack.(uint32))
-		PackUInt(writer, argUInt)
-	} else if typeStr == "int64" {
-		argLong := argPack.(int64)
-		PackLong(writer, argLong)
-	} else if typeStr == "uint64" {
-		argULong := argPack.(uint64)
-		PackULong(writer, argULong)
-	} else if typeStr == "string" {
-		argString := argPack.(string)
-		PackString(writer, argString)
-	} else if typeStr == "float32" {
-		argFloat := argPack.(float32)
-		PackFloat(writer, argFloat)
-	} else if typeStr == "float64" {
-		argDouble := argPack.(float64)
-		PackDouble(writer, argDouble)
-	} else if typeStr[0] == '[' {
-		argArray := reflect.ValueOf(argPack).Convert(reflect.TypeOf(argPack))
-		PackInt(writer, argArray.Len())
-		for i := 0; i < argArray.Len(); i++ {
-			err := Pack(writer, argArray.Index(i).Interface())
+	var err error = nil
+	switch typeKind {
+	case reflect.Bool:
+		return PackBool(writer, typeValue.Bool())
+	case reflect.Int8:
+		return PackInt8(writer, int8(typeValue.Int()))
+	case reflect.Uint8:
+		return PackUint8(writer, uint8(typeValue.Uint()))
+	case reflect.Int16:
+		return PackInt16(writer, int16(typeValue.Int()))
+	case reflect.Uint16:
+		return PackUint16(writer, uint16(typeValue.Uint()))
+	case reflect.Int32:
+		return PackInt32(writer, int32(typeValue.Int()))
+	case reflect.Uint32:
+		return PackUint32(writer, uint32(typeValue.Uint()))
+	case reflect.Int64:
+		return PackInt64(writer, typeValue.Int())
+	case reflect.Uint64:
+		return PackUint64(writer, typeValue.Uint())
+	case reflect.Int:
+		return PackInt(writer, int(typeValue.Int()))
+	case reflect.Uint:
+		return PackUint(writer, uint(typeValue.Uint()))
+	case reflect.Float32:
+		return PackFloat32(writer, float32(typeValue.Float()))
+	case reflect.Float64:
+		return PackFloat64(writer, typeValue.Float())
+	case reflect.String:
+		return PackString(writer, typeValue.String())
+	case reflect.Array:
+		for i := 0; i < typeValue.Len(); i++ {
+			err = Pack(writer, typeValue.Index(i).Interface())
 			if err != nil {
-				return errors.New("fail to pack element of array")
+				return err
 			}
 		}
-	} else if strings.Contains(typeStr, "map[") && typeStr[0:4] == "map[" {
-		argMap := reflect.ValueOf(argPack).Convert(reflect.TypeOf(argPack))
-		keys := argMap.MapKeys()
-		PackInt(writer, len(keys))
-		for i := 0; i < len(keys); i++ {
-			err := Pack(writer, keys[i].Interface())
-			if err != nil {
-				return errors.New("fail to pack key of map")
-			}
-			err = Pack(writer, argMap.MapIndex(keys[i]).Interface())
-			if err != nil {
-				return errors.New("fail to pack value of map")
-			}
-		}
-	} else {
-		argObj := reflect.ValueOf(argPack).Convert(reflect.TypeOf(argPack))
-		methodPack := argObj.MethodByName("Pack")
-
-		errValue := methodPack.Call([]reflect.Value{reflect.ValueOf(writer).Convert(reflect.TypeOf(writer))})
-		err := errValue[0].Interface().(error)
+		return nil
+	case reflect.Slice:
+		sliceLen := uint32(typeValue.Len())
+		err = PackUint32(writer, sliceLen)
 		if err != nil {
-			return errors.New("fail to pack object of " + typeStr)
+			return err
 		}
+		for i := 0; i < typeValue.Len(); i++ {
+			err = Pack(writer, typeValue.Index(i).Interface())
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	case reflect.Map:
+		mapLen := uint32(typeValue.Len())
+		err = PackUint32(writer, mapLen)
+		if err != nil {
+			return err
+		}
+		keys := typeValue.MapKeys()
+		for _, key := range keys {
+			err = Pack(writer, key.Interface())
+			if err != nil {
+				return err
+			}
+			err = Pack(writer, typeValue.MapIndex(key).Interface())
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	case reflect.Struct:
+		methodPack := typeValue.MethodByName("Pack")
+		errValue := methodPack.Call([]reflect.Value{reflect.ValueOf(writer)})
+		err := errValue[0].Interface()
+		if err != nil {
+			return err.(error)
+		}
+		return nil
+	default:
+		err = errors.New(fmt.Sprintf("Not Support Pack Type: %s", typeKind.String()))
+		return err
 	}
-
-	return nil
 }
 
-func UnPackByte(reader io.Reader) byte {
+func UnPackBool(reader io.Reader) (bool, error) {
 	var bytes [1]byte
-	_, _ = reader.Read(bytes[0:1])
-	return bytes[0]
-}
-
-func UnPackChar(reader io.Reader) int8 {
-	var bytes [1]byte
-	_, _ = reader.Read(bytes[0:1])
-	return int8(bytes[0])
-}
-
-func UnPackUChar(reader io.Reader) uint8 {
-	var bytes [1]byte
-	_, _ = reader.Read(bytes[0:1])
-	return uint8(bytes[0])
-}
-
-func UnPackShort(reader io.Reader) int16 {
-	var bytes [2]byte
-	_, _ = reader.Read(bytes[0:2])
-	return int16(int16(bytes[0])<<8 | int16(bytes[1]))
-}
-
-func UnPackUShort(reader io.Reader) uint16 {
-	var bytes [2]byte
-	_, _ = reader.Read(bytes[0:2])
-	return uint16(uint16(bytes[0])<<8 | uint16(bytes[1]))
-}
-
-func UnPackInt(reader io.Reader) int {
-	var bytes [4]byte
-	_, _ = reader.Read(bytes[0:4])
-	return int(int(bytes[0])<<24 | int(bytes[1])<<16 | int(bytes[2])<<8 | int(bytes[3]))
-}
-
-func UnPackUInt(reader io.Reader) uint {
-	var bytes [4]byte
-	_, _ = reader.Read(bytes[0:4])
-	return uint(uint(bytes[0])<<24 | uint(bytes[1])<<16 | uint(bytes[2])<<8 | uint(bytes[3]))
-}
-
-func UnPackLong(reader io.Reader) int64 {
-	var bytes [8]byte
-	_, _ = reader.Read(bytes[0:8])
-	return int64(int64(bytes[0])<<56 | int64(bytes[1])<<48 | int64(bytes[2])<<40 | int64(bytes[3])<<32 | int64(bytes[4])<<24 | int64(bytes[5])<<16 | int64(bytes[6])<<8 | int64(bytes[7]))
-}
-
-func UnPackULong(reader io.Reader) uint64 {
-	var bytes [8]byte
-	_, _ = reader.Read(bytes[0:8])
-	return uint64(uint64(bytes[0])<<56 | uint64(bytes[1])<<48 | uint64(bytes[2])<<40 | uint64(bytes[3])<<32 | uint64(bytes[4])<<24 | uint64(bytes[5])<<16 | uint64(bytes[6])<<8 | uint64(bytes[7]))
-}
-
-func UnPackString(reader io.Reader) string {
-	strLength := UnPackInt(reader)
-	bytes := make([]byte, strLength)
-	_, _ = reader.Read(bytes[0:strLength])
-	return string(bytes)
-}
-
-func UnPackFloat(reader io.Reader) float32 {
-	var bytes [4]byte
-	_, _ = reader.Read(bytes[0:4])
-	var valFloat float32
-	unsafePtr := uintptr(unsafe.Pointer(&valFloat))
-	*(*byte)(unsafe.Pointer(unsafePtr)) = bytes[0]
-	*(*byte)(unsafe.Pointer(unsafePtr + uintptr(1))) = bytes[1]
-	*(*byte)(unsafe.Pointer(unsafePtr + uintptr(2))) = bytes[2]
-	*(*byte)(unsafe.Pointer(unsafePtr + uintptr(3))) = bytes[3]
-	return valFloat
-}
-
-func UnPackDouble(reader io.Reader) float64 {
-	var bytes [8]byte
-	_, _ = reader.Read(bytes[0:8])
-	var valDouble float64
-	unsafePtr := uintptr(unsafe.Pointer(&valDouble))
-	*(*byte)(unsafe.Pointer(unsafePtr)) = bytes[0]
-	*(*byte)(unsafe.Pointer(unsafePtr + uintptr(1))) = bytes[1]
-	*(*byte)(unsafe.Pointer(unsafePtr + uintptr(2))) = bytes[2]
-	*(*byte)(unsafe.Pointer(unsafePtr + uintptr(3))) = bytes[3]
-	*(*byte)(unsafe.Pointer(unsafePtr + uintptr(4))) = bytes[4]
-	*(*byte)(unsafe.Pointer(unsafePtr + uintptr(5))) = bytes[5]
-	*(*byte)(unsafe.Pointer(unsafePtr + uintptr(6))) = bytes[6]
-	*(*byte)(unsafe.Pointer(unsafePtr + uintptr(7))) = bytes[7]
-	return valDouble
-}
-
-func UnPack(reader io.Reader, argExample interface{}) (interface{}, error) {
-	typeStr := reflect.TypeOf(argExample).String()
-
-	if typeStr == "byte" {
-		argByte := UnPackByte(reader)
-		return argByte, nil
-	} else if typeStr == "int8" {
-		argChar := UnPackChar(reader)
-		return argChar, nil
-	} else if typeStr == "uint8" {
-		argUChar := UnPackUChar(reader)
-		return argUChar, nil
-	} else if typeStr == "int16" {
-		argShort := UnPackShort(reader)
-		return argShort, nil
-	} else if typeStr == "uint16" {
-		argUShort := UnPackUShort(reader)
-		return argUShort, nil
-	} else if typeStr == "int" {
-		argInt := UnPackInt(reader)
-		return argInt, nil
-	} else if typeStr == "uint" {
-		argUInt := UnPackUInt(reader)
-		return argUInt, nil
-	} else if typeStr == "int32" {
-		argInt := UnPackInt(reader)
-		return int32(argInt), nil
-	} else if typeStr == "uint32" {
-		argUInt := UnPackUInt(reader)
-		return uint32(argUInt), nil
-	} else if typeStr == "int64" {
-		argLong := UnPackLong(reader)
-		return argLong, nil
-	} else if typeStr == "uint64" {
-		argULong := UnPackULong(reader)
-		return argULong, nil
-	} else if typeStr == "string" {
-		argString := UnPackString(reader)
-		return argString, nil
-	} else if typeStr == "float32" {
-		argFloat := UnPackFloat(reader)
-		return argFloat, nil
-	} else if typeStr == "float64" {
-		argDouble := UnPackDouble(reader)
-		return argDouble, nil
-	} else if typeStr[0] == '[' {
-		var argArray []interface{}
-		argArrayExample := reflect.ValueOf(argExample).Convert(reflect.TypeOf(argExample))
-		if argArrayExample.Len() == 0 {
-			return nil, errors.New("invalid example with nil array")
-		}
-		arraySize := UnPackInt(reader)
-		for i := 0; i < arraySize; i++ {
-			argElement, err := UnPack(reader, argArrayExample.Index(0).Interface())
-			if err != nil {
-				return nil, err
-			} else {
-				argArray = append(argArray, argElement)
-			}
-		}
-		return argArray, nil
-	} else if strings.Contains(typeStr, "map[") && typeStr[0:4] == "map[" {
-		argMap := make(map[interface{}]interface{})
-		argMapExample := reflect.ValueOf(argExample).Convert(reflect.TypeOf(argExample))
-		if argMapExample.Len() == 0 {
-			return nil, errors.New("invalid example with nil map")
-		}
-		exampleKeys := argMapExample.MapKeys()
-		mapSize := UnPackInt(reader)
-		for i := 0; i < mapSize; i++ {
-			argKey, err := UnPack(reader, exampleKeys[0].Interface())
-			if err != nil {
-				return nil, err
-			}
-			argValue, err := UnPack(reader, argMapExample.MapIndex(exampleKeys[0]).Interface())
-			if err != nil {
-				return nil, err
-			}
-			argMap[argKey] = argValue
-		}
-		return argMap, nil
+	_, err := reader.Read(bytes[0:1])
+	if err != nil {
+		return false, err
+	}
+	if bytes[0] == uint8(1) {
+		return true, nil
+	} else if bytes[0] == uint8(0) {
+		return false, nil
 	} else {
-		refObj := reflect.ValueOf(argExample).Convert(reflect.TypeOf(argExample))
+		return false, errors.New("UnPackBool: Unexpected byte")
+	}
+}
+
+func UnPackInt8(reader io.Reader) (int8, error) {
+	var bytes [1]byte
+	_, err := reader.Read(bytes[0:1])
+	if err != nil {
+		return 0, err
+	}
+	return int8(bytes[0]), nil
+}
+
+func UnPackUint8(reader io.Reader) (uint8, error) {
+	var bytes [1]byte
+	_, err := reader.Read(bytes[0:1])
+	if err != nil {
+		return 0, err
+	}
+	return bytes[0], nil
+}
+
+func UnPackInt16(reader io.Reader) (int16, error) {
+	var bytes [2]byte
+	_, err := reader.Read(bytes[0:2])
+	if err != nil {
+		return 0, err
+	}
+	return int16(binary.LittleEndian.Uint16(bytes[:])), nil
+}
+
+func UnPackUint16(reader io.Reader) (uint16, error) {
+	var bytes [2]byte
+	_, err := reader.Read(bytes[0:2])
+	if err != nil {
+		return 0, err
+	}
+	return binary.LittleEndian.Uint16(bytes[:]), nil
+}
+
+func UnPackInt32(reader io.Reader) (int32, error) {
+	var bytes [4]byte
+	_, err := reader.Read(bytes[0:4])
+	if err != nil {
+		return 0, err
+	}
+	return int32(binary.LittleEndian.Uint32(bytes[:])), nil
+}
+
+func UnPackUint32(reader io.Reader) (uint32, error) {
+	var bytes [4]byte
+	_, err := reader.Read(bytes[0:4])
+	if err != nil {
+		return 0, err
+	}
+	return binary.LittleEndian.Uint32(bytes[:]), nil
+}
+
+func UnPackInt64(reader io.Reader) (int64, error) {
+	var bytes [8]byte
+	_, err := reader.Read(bytes[0:8])
+	if err != nil {
+		return 0, err
+	}
+	return int64(binary.LittleEndian.Uint64(bytes[:])), nil
+}
+
+func UnPackUint64(reader io.Reader) (uint64, error) {
+	var bytes [8]byte
+	_, err := reader.Read(bytes[0:8])
+	if err != nil {
+		return 0, err
+	}
+	return binary.LittleEndian.Uint64(bytes[:]), nil
+}
+
+func UnPackInt(reader io.Reader) (int, error) {
+	var bytes [8]byte
+	_, err := reader.Read(bytes[0:8])
+	if err != nil {
+		return 0, err
+	}
+	return int(binary.LittleEndian.Uint64(bytes[:])), nil
+}
+
+func UnPackUint(reader io.Reader) (uint, error) {
+	var bytes [8]byte
+	_, err := reader.Read(bytes[0:8])
+	if err != nil {
+		return 0, err
+	}
+	return uint(binary.LittleEndian.Uint64(bytes[:])), nil
+}
+
+func UnPackFloat32(reader io.Reader) (float32, error) {
+	var bytes [4]byte
+	_, err := reader.Read(bytes[0:4])
+	if err != nil {
+		return 0.0, err
+	}
+	bits := binary.LittleEndian.Uint32(bytes[:])
+	return math.Float32frombits(bits), nil
+}
+
+func UnPackFloat64(reader io.Reader) (float64, error) {
+	var bytes [8]byte
+	_, err := reader.Read(bytes[0:8])
+	if err != nil {
+		return 0.0, err
+	}
+	bits := binary.LittleEndian.Uint64(bytes[:])
+	return math.Float64frombits(bits), nil
+}
+
+func UnPackString(reader io.Reader) (string, error) {
+	strLen, err := UnPackUint32(reader)
+	if err != nil {
+		return "", err
+	}
+	bytes := make([]byte, strLen)
+	_, err = reader.Read(bytes[0:strLen])
+	if err != nil {
+		return "", err
+	}
+	return string(bytes), nil
+}
+
+func UnPack(reader io.Reader, ty reflect.Type) (interface{}, error) {
+	var err error = nil
+	switch ty.Kind() {
+	case reflect.Bool:
+		return UnPackBool(reader)
+	case reflect.Int8:
+		return UnPackInt8(reader)
+	case reflect.Uint8:
+		return UnPackUint8(reader)
+	case reflect.Int16:
+		return UnPackInt16(reader)
+	case reflect.Uint16:
+		return UnPackUint16(reader)
+	case reflect.Int32:
+		return UnPackInt32(reader)
+	case reflect.Uint32:
+		return UnPackUint32(reader)
+	case reflect.Int64:
+		return UnPackInt64(reader)
+	case reflect.Uint64:
+		return UnPackUint64(reader)
+	case reflect.Int:
+		return UnPackInt(reader)
+	case reflect.Uint:
+		return UnPackUint(reader)
+	case reflect.Float32:
+		return UnPackFloat32(reader)
+	case reflect.Float64:
+		return UnPackFloat64(reader)
+	case reflect.String:
+		return UnPackString(reader)
+	case reflect.Array:
+		arrayLen := ty.Len()
+		array := reflect.New(ty).Elem()
+		for i := 0; i < arrayLen; i++ {
+			val, err := UnPack(reader, ty.Elem())
+			if err != nil {
+				return nil, err
+			}
+			array.Index(i).Set(reflect.ValueOf(val))
+		}
+		return array.Interface(), nil
+	case reflect.Slice:
+		sliceLen, err := UnPackUint32(reader)
+		if err != nil {
+			return nil, err
+		}
+		slice := reflect.MakeSlice(ty, 0, int(sliceLen))
+		for i := 0; i < int(sliceLen); i++ {
+			val, err := UnPack(reader, ty.Elem())
+			if err != nil {
+				return nil, err
+			}
+			slice = reflect.Append(slice, reflect.ValueOf(val))
+		}
+		return slice.Interface(), nil
+	case reflect.Map:
+		mapLen, err := UnPackUint32(reader)
+		if err != nil {
+			return nil, err
+		}
+		m := reflect.MakeMap(ty)
+		for i := 0; i < int(mapLen); i++ {
+			k, err := UnPack(reader, ty.Key())
+			if err != nil {
+				return nil, err
+			}
+			v, err := UnPack(reader, ty.Elem())
+			if err != nil {
+				return nil, err
+			}
+			m.SetMapIndex(reflect.ValueOf(k), reflect.ValueOf(v))
+		}
+		return m.Interface(), nil
+	case reflect.Struct:
+		refObj := reflect.New(ty)
 		methodUnPack := refObj.MethodByName("UnPack")
 
-		retValue := methodUnPack.Call([]reflect.Value{reflect.ValueOf(reader).Convert(reflect.TypeOf(reader))})
+		retValue := methodUnPack.Call([]reflect.Value{reflect.ValueOf(reader)})
 		err := retValue[1].Interface()
 		if err != nil {
-			return nil, errors.New("fail to pack object of " + typeStr)
+			return nil, err.(error)
 		}
 		return retValue[0].Interface(), nil
+	default:
+		err = errors.New(fmt.Sprintf("Not Support UnPack Type: %s", ty.String()))
+		return nil, err
 	}
-
-	//return nil, nil
 }
